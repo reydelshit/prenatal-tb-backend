@@ -10,22 +10,13 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case "GET":
 
-        if (isset($_GET['user_id'])) {
-            $user_id_specific_user = $_GET['user_id'];
-            $sql = "SELECT * FROM users WHERE user_id = :user_id";
-        }
-
-        if (!isset($_GET['user_id']) && !isset($_GET['product_id'])) {
-            $sql = "SELECT * FROM users WHERE user_type = 'user' ORDER BY user_id DESC";
-        }
+        $sql = "SELECT * FROM patient ORDER BY patient_id DESC";
 
 
         if (isset($sql)) {
             $stmt = $conn->prepare($sql);
 
-            if (isset($user_id_specific_user)) {
-                $stmt->bindParam(':user_id', $user_id_specific_user);
-            }
+
 
             $stmt->execute();
             $product = $stmt->fetchAll(PDO::FETCH_ASSOC);
