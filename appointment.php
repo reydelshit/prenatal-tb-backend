@@ -53,18 +53,16 @@ switch ($method) {
         break;
 
     case "PUT":
-        $user = json_decode(file_get_contents('php://input'));
-        $sql = "UPDATE users SET name= :name, email=:email, gender=:gender, profile_picture=:profile_picture, address=:address, profile_description=:profile_description, updated_at=:updated_at WHERE user_id = :user_id";
+        $appointment = json_decode(file_get_contents('php://input'));
+        $sql = "UPDATE appointments SET appointment_title= :appointment_title, start=:start, end=:end, allDay=:allDay 
+                WHERE appointment_id = :appointment_id";
         $stmt = $conn->prepare($sql);
         $updated_at = date('Y-m-d');
-        $stmt->bindParam(':user_id', $user->user_id);
-        $stmt->bindParam(':name', $user->name);
-        $stmt->bindParam(':email', $user->email);
-        $stmt->bindParam(':profile_picture', $user->profile_picture);
-        $stmt->bindParam(':address', $user->address);
-        $stmt->bindParam(':gender', $user->gender);
-        $stmt->bindParam(':profile_description', $user->profile_description);
-        $stmt->bindParam(':updated_at', $updated_at);
+        $stmt->bindParam(':appointment_id', $appointment->appointment_id);
+        $stmt->bindParam(':appointment_title', $appointment->appointment_title);
+        $stmt->bindParam(':start', $appointment->start);
+        $stmt->bindParam(':end', $appointment->end);
+        $stmt->bindParam(':allDay', $appointment->allDay);
 
         if ($stmt->execute()) {
 
