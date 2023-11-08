@@ -10,16 +10,32 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case "GET":
 
-        $sql = "SELECT appointment_id AS id, appointment_title AS title, start, end, allDay FROM appointments";
+
+
+        if (isset($_GET['question_id'])) {
+            $question_specific = $_GET['question_id'];
+            $sql = "SELECT question_id AS id, question_text AS title, question_type FROM questions WHERE question_id = :question_id ";
+        }
+
+        if (!isset($_GET['question_id'])) {
+            $sql = "SELECT question_id AS id, question_text AS title, question_type FROM questions ORDER BY question_id DESC";
+        }
 
         if (isset($sql)) {
             $stmt = $conn->prepare($sql);
 
-            $stmt->execute();
-            $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (isset($question_specific)) {
+                $stmt->bindParam(':question_id', $question_specific);
+            }
 
-            echo json_encode($appointments);
+
+
+            $stmt->execute();
+            $question = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode($question);
         }
+
 
 
         break;
@@ -51,27 +67,26 @@ switch ($method) {
         break;
 
     case "PUT":
-        $appointment = json_decode(file_get_contents('php://input'));
-        $sql = "UPDATE appointments SET appointment_title= :appointment_title, start=:start, end=:end, allDay=:allDay 
-                WHERE appointment_id = :appointment_id";
+        $question = json_decode(file_get_contents('php://input'));
+        $sql = "UPDATE questions SET question_text= :question_text, question_type=:question_type
+                WHERE question_id = :question_id";
         $stmt = $conn->prepare($sql);
         $updated_at = date('Y-m-d');
-        $stmt->bindParam(':appointment_id', $appointment->appointment_id);
-        $stmt->bindParam(':appointment_title', $appointment->appointment_title);
-        $stmt->bindParam(':start', $appointment->start);
-        $stmt->bindParam(':end', $appointment->end);
-        $stmt->bindParam(':allDay', $appointment->allDay);
+        $stmt->bindParam(':question_id', $question->question_id);
+        $stmt->bindParam(':question_text', $question->question_text);
+        $stmt->bindParam(':question_type', $question->question_type);
+
 
         if ($stmt->execute()) {
 
             $response = [
                 "status" => "success",
-                "message" => "User updated successfully"
+                "message" => "question updated successfully"
             ];
         } else {
             $response = [
                 "status" => "error",
-                "message" => "User update failed"
+                "message" => "question update failed"
             ];
         }
 
@@ -79,7 +94,7 @@ switch ($method) {
         break;
 
     case "DELETE":
-        $sql = "DELETE FROM appointments WHERE appointment_id = :id";
+        $sql = "DELETE FROM questions WHERE question_id = :id";
         $path = explode('/', $_SERVER['REQUEST_URI']);
 
         $stmt = $conn->prepare($sql);
@@ -88,12 +103,12 @@ switch ($method) {
         if ($stmt->execute()) {
             $response = [
                 "status" => "success",
-                "message" => "User deleted successfully"
+                "message" => "Question deleted successfully"
             ];
         } else {
             $response = [
                 "status" => "error",
-                "message" => "User deletion failed"
+                "message" => "Question  deletion failed"
             ];
         }
 }

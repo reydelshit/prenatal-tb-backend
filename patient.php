@@ -28,24 +28,44 @@ switch ($method) {
         break;
 
     case "POST":
-        $patient = json_decode(file_get_contents('php://input'));
+        $patients = json_decode(file_get_contents('php://input'));
         $sql = "INSERT INTO patient (patient_id, patient_name, patient_middlename, patient_lastname, patient_birthday, patient_age, patient_gender, patient_email, patient_phone, patient_type) 
         VALUES (null, :patient_name, :patient_middlename, :patient_lastname, :patient_birthday, :patient_age, :patient_gender, :patient_email, :patient_phone, :patient_type)";
         $stmt = $conn->prepare($sql);
         // $created_at = date('Y-m-d');
-        $stmt->bindParam(':patient_name', $patient->patient_name);
-        $stmt->bindParam(':patient_middlename', $patient->patient_middlename);
-        $stmt->bindParam(':patient_lastname', $patient->patient_lastname);
-        $stmt->bindParam(':patient_birthday', $patient->patient_birthday);
-        $stmt->bindParam(':patient_age', $patient->patient_age);
-        $stmt->bindParam(':patient_gender', $patient->patient_gender);
-        $stmt->bindParam(':patient_email', $patient->patient_email);
-        $stmt->bindParam(':patient_phone', $patient->patient_phone);
-        $stmt->bindParam(':patient_type', $patient->patient_type);
+        $stmt->bindParam(':patient_name', $patients->patient_name);
+        $stmt->bindParam(':patient_middlename', $patients->patient_middlename);
+        $stmt->bindParam(':patient_lastname', $patients->patient_lastname);
+        $stmt->bindParam(':patient_birthday', $patients->patient_birthday);
+        $stmt->bindParam(':patient_age', $patients->patient_age);
+        $stmt->bindParam(':patient_gender', $patients->patient_gender);
+        $stmt->bindParam(':patient_email', $patients->patient_email);
+        $stmt->bindParam(':patient_phone', $patients->patient_phone);
+        $stmt->bindParam(':patient_type', $patients->patient_type);
 
         // $stmt->bindParam(':created_at', $created_at);
 
         if ($stmt->execute()) {
+
+            $lastInsertedId = $conn->lastInsertId();
+
+            $tuberculosisData = $patients->tuberculosisData;
+
+
+            foreach ($tuberculosisData as $patient) {
+                $sql2 = "INSERT INTO info_answers (info_answer_id, patient_id, question_id, answer_text, answer_type)"
+                    . " VALUES (null, :patient_id, :question_id, :answer_text, :answer_type)";
+
+                $stmt2 = $conn->prepare($sql2);
+
+                $stmt2->bindParam(':patient_id', $lastInsertedId);
+                $stmt2->bindParam(':question_id', $patient->question_id);
+                $stmt2->bindParam(':answer_text', $patient->answer_text);
+                $stmt2->bindParam(':answer_type', $patients->patient_type);
+
+                // Execute the INSERT statement for each patient's answer
+                $stmt2->execute();
+            }
             $response = [
                 "status" => "success",
                 "message" => "Patient created successfully"
