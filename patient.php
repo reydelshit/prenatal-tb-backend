@@ -29,8 +29,8 @@ switch ($method) {
 
     case "POST":
         $patient = json_decode(file_get_contents('php://input'));
-        $sql = "INSERT INTO patient (patient_id, patient_name, patient_middlename, patient_lastname, patient_birthday, patient_age, patient_gender, patient_email, patient_phone) 
-        VALUES (null, :patient_name, :patient_middlename, :patient_lastname, :patient_birthday, :patient_age, :patient_gender, :patient_email, :patient_phone)";
+        $sql = "INSERT INTO patient (patient_id, patient_name, patient_middlename, patient_lastname, patient_birthday, patient_age, patient_gender, patient_email, patient_phone, patient_type) 
+        VALUES (null, :patient_name, :patient_middlename, :patient_lastname, :patient_birthday, :patient_age, :patient_gender, :patient_email, :patient_phone, :patient_type)";
         $stmt = $conn->prepare($sql);
         // $created_at = date('Y-m-d');
         $stmt->bindParam(':patient_name', $patient->patient_name);
@@ -41,6 +41,8 @@ switch ($method) {
         $stmt->bindParam(':patient_gender', $patient->patient_gender);
         $stmt->bindParam(':patient_email', $patient->patient_email);
         $stmt->bindParam(':patient_phone', $patient->patient_phone);
+        $stmt->bindParam(':patient_type', $patient->patient_type);
+
         // $stmt->bindParam(':created_at', $created_at);
 
         if ($stmt->execute()) {
