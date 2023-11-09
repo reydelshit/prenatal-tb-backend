@@ -29,10 +29,10 @@ switch ($method) {
 
     case "POST":
         $patients = json_decode(file_get_contents('php://input'));
-        $sql = "INSERT INTO patient (patient_id, patient_name, patient_middlename, patient_lastname, patient_birthday, patient_age, patient_gender, patient_email, patient_phone, patient_type) 
-        VALUES (null, :patient_name, :patient_middlename, :patient_lastname, :patient_birthday, :patient_age, :patient_gender, :patient_email, :patient_phone, :patient_type)";
+        $sql = "INSERT INTO patient (patient_id, patient_name, patient_middlename, patient_lastname, patient_birthday, patient_age, patient_gender, patient_email, patient_phone, patient_type, created_at) 
+        VALUES (null, :patient_name, :patient_middlename, :patient_lastname, :patient_birthday, :patient_age, :patient_gender, :patient_email, :patient_phone, :patient_type, :created_at)";
         $stmt = $conn->prepare($sql);
-        // $created_at = date('Y-m-d');
+        $created_at = date('Y-m-d H:i:s');
         $stmt->bindParam(':patient_name', $patients->patient_name);
         $stmt->bindParam(':patient_middlename', $patients->patient_middlename);
         $stmt->bindParam(':patient_lastname', $patients->patient_lastname);
@@ -43,29 +43,63 @@ switch ($method) {
         $stmt->bindParam(':patient_phone', $patients->patient_phone);
         $stmt->bindParam(':patient_type', $patients->patient_type);
 
-        // $stmt->bindParam(':created_at', $created_at);
+        $stmt->bindParam(':created_at', $created_at);
+
+
+
 
         if ($stmt->execute()) {
 
             $lastInsertedId = $conn->lastInsertId();
 
+
+            $sql4 = "INSERT INTO visits (visit_id, patient_id, visit_date, created_at) VALUES (null, :patient_id, :visit_date, :created_at)";
+
+            $stmt4 = $conn->prepare($sql4);
+            $visit_date = date('Y-m-d H:i:s');
+
+            $stmt4->bindParam('patient_id', $lastInsertedId);
+            $stmt4->bindParam('visit_date', $visit_date);
+            $stmt4->bindParam('created_at', $created_at);
+
+            $stmt4->execute();
+
+
             $tuberculosisData = $patients->tuberculosisData;
+            $prenatalData = $patients->prenatalData;
 
 
-            foreach ($tuberculosisData as $patient) {
-                $sql2 = "INSERT INTO info_answers (info_answer_id, patient_id, question_id, answer_text, answer_type)"
-                    . " VALUES (null, :patient_id, :question_id, :answer_text, :answer_type)";
+            if ($patients->patient_type === 'Tuberculosis') {
+                foreach ($tuberculosisData as $patient) {
+                    $sql2 = "INSERT INTO info_answers (info_answer_id, patient_id, question_id, answer_text, answer_type)"
+                        . " VALUES (null, :patient_id, :question_id, :answer_text, :answer_type)";
 
-                $stmt2 = $conn->prepare($sql2);
+                    $stmt2 = $conn->prepare($sql2);
 
-                $stmt2->bindParam(':patient_id', $lastInsertedId);
-                $stmt2->bindParam(':question_id', $patient->question_id);
-                $stmt2->bindParam(':answer_text', $patient->answer_text);
-                $stmt2->bindParam(':answer_type', $patients->patient_type);
+                    $stmt2->bindParam(':patient_id', $lastInsertedId);
+                    $stmt2->bindParam(':question_id', $patient->question_id);
+                    $stmt2->bindParam(':answer_text', $patient->answer_text);
+                    $stmt2->bindParam(':answer_type', $patients->patient_type);
 
-                // Execute the INSERT statement for each patient's answer
-                $stmt2->execute();
+                    $stmt2->execute();
+                }
+            } else {
+                foreach ($prenatalData as $patient) {
+                    $sql2 = "INSERT INTO info_answers (info_answer_id, patient_id, question_id, answer_text, answer_type)"
+                        . " VALUES (null, :patient_id, :question_id, :answer_text, :answer_type)";
+
+                    $stmt2 = $conn->prepare($sql2);
+
+                    $stmt2->bindParam(':patient_id', $lastInsertedId);
+                    $stmt2->bindParam(':question_id', $patient->question_id);
+                    $stmt2->bindParam(':answer_text', $patient->answer_text);
+                    $stmt2->bindParam(':answer_type', $patients->patient_type);
+
+                    $stmt2->execute();
+                }
             }
+
+
             $response = [
                 "status" => "success",
                 "message" => "Patient created successfully"
