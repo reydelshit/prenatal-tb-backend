@@ -41,6 +41,13 @@ switch ($method) {
 
         if ($stmt4->execute()) {
 
+            $sql5 =  "UPDATE appointments SET appointment_status= :appointment_status
+                WHERE appointment_id = :appointment_id";
+            $stmt5 = $conn->prepare($sql5);
+            $status = 'Done';
+            $stmt5->bindParam('appointment_status', $status);
+            $stmt5->bindParam('appointment_id', $patients->appointment_id);
+
             $response = [
                 "status" => "success",
                 "message" => "Patient created successfully"
