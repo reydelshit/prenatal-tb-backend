@@ -10,10 +10,26 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case "GET":
 
-        $sql = "SELECT appointment_id AS id, appointment_title AS title, start, end, allDay FROM appointments";
 
+
+        if (isset($_GET['patient_id'])) {
+            $patient_id_specific = $_GET['patient_id'];
+            $sql = "SELECT *
+            FROM appointments
+            WHERE patient_id = :patient_id
+              AND CURDATE() >= appointments.start
+              AND CURDATE() <= appointments.end;";
+        }
+
+        if (!isset($_GET['patient_id'])) {
+            $sql = "SELECT appointment_id AS id, appointment_title AS title, start, end, allDay FROM appointments";
+        }
         if (isset($sql)) {
             $stmt = $conn->prepare($sql);
+
+            if (isset($patient_id_specific)) {
+                $stmt->bindParam(':patient_id', $patient_id_specific);
+            }
 
             $stmt->execute();
             $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -26,14 +42,17 @@ switch ($method) {
 
     case "POST":
         $appointment = json_decode(file_get_contents('php://input'));
-        $sql = "INSERT INTO appointments (appointment_id, appointment_title, start, end, allDay) 
-                VALUES (null, :appointment_title, :start, :end, :allDay)";
+        $sql = "INSERT INTO appointments (appointment_id, appointment_title, start, end, allDay, patient_id) 
+                VALUES (null, :appointment_title, :start, :end, :allDay, :patient_id)";
         $stmt = $conn->prepare($sql);
         $created_at = date('Y-m-d');
         $stmt->bindParam(':appointment_title', $appointment->appointment_title);
         $stmt->bindParam(':start', $appointment->start);
         $stmt->bindParam(':end', $appointment->end);
         $stmt->bindParam(':allDay', $appointment->allDay);
+        $stmt->bindParam(':patient_id', $appointment->patient_id);
+
+
 
         // $stmt->bindParam(':created_at', $created_at);
 

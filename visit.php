@@ -10,22 +10,13 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case "GET":
 
-        if (isset($_GET['user_id'])) {
-            $user_id_specific_user = $_GET['user_id'];
-            $sql = "SELECT * FROM users WHERE user_id = :user_id";
-        }
-
-        if (!isset($_GET['user_id']) && !isset($_GET['product_id'])) {
-            $sql = "SELECT * FROM users WHERE user_type = 'user' ORDER BY user_id DESC";
-        }
+        $sql = "SELECT * FROM patient ORDER BY patient_id DESC";
 
 
         if (isset($sql)) {
             $stmt = $conn->prepare($sql);
 
-            if (isset($user_id_specific_user)) {
-                $stmt->bindParam(':user_id', $user_id_specific_user);
-            }
+
 
             $stmt->execute();
             $product = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -37,26 +28,27 @@ switch ($method) {
         break;
 
     case "POST":
-        $user = json_decode(file_get_contents('php://input'));
-        $sql = "INSERT INTO users (user_id, name, email, password, gender, address, created_at) VALUES (null, :name, :email, :password, :gender, :address, :created_at)";
-        $stmt = $conn->prepare($sql);
-        $created_at = date('Y-m-d');
-        $stmt->bindParam(':name', $user->name);
-        $stmt->bindParam(':email', $user->email);
-        $stmt->bindParam(':password', $user->password);
-        $stmt->bindParam(':gender', $user->gender);
-        $stmt->bindParam(':address', $user->address);
-        $stmt->bindParam(':created_at', $created_at);
+        $patients = json_decode(file_get_contents('php://input'));
+        $sql4 = "INSERT INTO visits (visit_id, patient_id, visit_date, created_at) VALUES (null, :patient_id, :visit_date, :created_at)";
 
-        if ($stmt->execute()) {
+        $stmt4 = $conn->prepare($sql4);
+        $visit_date = date('Y-m-d H:i:s');
+
+        $stmt4->bindParam('patient_id', $patients->patient_id);
+        $stmt4->bindParam('visit_date', $visit_date);
+        $stmt4->bindParam('created_at', $visit_date);
+
+
+        if ($stmt4->execute()) {
+
             $response = [
                 "status" => "success",
-                "message" => "User created successfully"
+                "message" => "Patient created successfully"
             ];
         } else {
             $response = [
                 "status" => "error",
-                "message" => "User creation failed"
+                "message" => "Patient creation failed"
             ];
         }
 

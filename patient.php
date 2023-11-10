@@ -46,8 +46,6 @@ switch ($method) {
         $stmt->bindParam(':created_at', $created_at);
 
 
-
-
         if ($stmt->execute()) {
 
             $lastInsertedId = $conn->lastInsertId();
@@ -63,6 +61,19 @@ switch ($method) {
             $stmt4->bindParam('created_at', $created_at);
 
             $stmt4->execute();
+
+            $sql3 = "INSERT INTO users (user_id, user_username, user_password, user_type, patient_id, created_at) VALUES (null, :user_username, :user_password, :user_type, :patient_id, :created_at)";
+
+            $stmt3 = $conn->prepare($sql3);
+
+            $pat = 'patient';
+            $stmt3->bindParam("user_username", $patients->user_username);
+            $stmt3->bindParam("user_password", $patients->user_password);
+            $stmt3->bindParam("user_type", $pat);
+            $stmt3->bindParam("created_at", $visit_date);
+            $stmt3->bindParam("patient_id", $lastInsertedId);
+
+            $stmt3->execute();
 
 
             $tuberculosisData = $patients->tuberculosisData;
