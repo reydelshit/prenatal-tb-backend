@@ -10,19 +10,30 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case "GET":
 
-        $sql = "SELECT * FROM patient ORDER BY patient_id DESC";
+        if (isset($_GET['patient_id'])) {
+            $patient_id_specific = $_GET['patient_id'];
+            $sql = "SELECT *
+            FROM patient
+            WHERE patient_id = :patient_id";
+        }
 
+        if (!isset($_GET['patient_id'])) {
+            $sql = "SELECT * FROM patient ORDER BY patient_id DESC";
+        }
 
         if (isset($sql)) {
             $stmt = $conn->prepare($sql);
 
-
+            if (isset($patient_id_specific)) {
+                $stmt->bindParam(':patient_id', $patient_id_specific);
+            }
 
             $stmt->execute();
-            $product = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $patient = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            echo json_encode($product);
+            echo json_encode($patient);
         }
+
 
 
         break;
