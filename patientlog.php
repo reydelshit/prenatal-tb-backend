@@ -12,46 +12,20 @@ switch ($method) {
 
 
 
-        if (isset($_GET['patient_id'])) {
-            $patient_id_specific = $_GET['patient_id'];
+        if (isset($_GET['appointment_id'])) {
+            $appointment_id_specific = $_GET['appointment_id'];
             $sql = "SELECT *
             FROM appointments
-            WHERE patient_id = :patient_id
+            WHERE appointment_id = :appointment_id
               AND CURDATE() >= appointments.start
               AND CURDATE() <= appointments.end";
         }
 
-        if (isset($_GET['patient_id']) && isset($_GET['next_appointment'])) {
-            $patient_id_next_appointment = $_GET['patient_id'];
-            $sql = "SELECT *
-            FROM appointments
-            WHERE patient_id = :patient_id
-              AND appointments.start >= CURRENT_TIMESTAMP
-            ORDER BY appointments.start
-            LIMIT 1";
-        }
-
-        if (isset($_GET['patient_id']) && isset($_GET['all_appointments'])) {
-            $patient_id_all_appointment = $_GET['patient_id'];
-            $sql = "SELECT appointment_id AS id, appointment_title AS title, start, end, allDay, appointment_status FROM appointments WHERE patient_id = :patient_id";
-        }
-
-        if (!isset($_GET['patient_id'])) {
-            $sql = "SELECT appointment_id AS id, appointment_title AS title, start, end, allDay FROM appointments";
-        }
         if (isset($sql)) {
             $stmt = $conn->prepare($sql);
 
-            if (isset($patient_id_specific)) {
-                $stmt->bindParam(':patient_id', $patient_id_specific);
-            }
-
-            if (isset($patient_id_next_appointment)) {
-                $stmt->bindParam(':patient_id', $patient_id_next_appointment);
-            }
-
-            if (isset($patient_id_all_appointment)) {
-                $stmt->bindParam(':patient_id', $patient_id_all_appointment);
+            if (isset($appointment_id_specific)) {
+                $stmt->bindParam(':appointment_id', $appointment_id_specific);
             }
 
 
@@ -70,7 +44,7 @@ switch ($method) {
         $sql = "INSERT INTO appointments (appointment_id, appointment_title, start, end, allDay, patient_id, appointment_status) 
                 VALUES (null, :appointment_title, :start, :end, :allDay, :patient_id, :appointment_status)";
         $stmt = $conn->prepare($sql);
-        $created_at = date('Y-m-d H:i:s');
+        $created_at = date('Y-m-d');
         $status = "Pending";
         $stmt->bindParam(':appointment_title', $appointment->appointment_title);
         $stmt->bindParam(':start', $appointment->start);

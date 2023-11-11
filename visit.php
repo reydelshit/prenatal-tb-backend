@@ -16,14 +16,11 @@ switch ($method) {
         if (isset($sql)) {
             $stmt = $conn->prepare($sql);
 
-
-
             $stmt->execute();
             $product = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             echo json_encode($product);
         }
-
 
         break;
 
