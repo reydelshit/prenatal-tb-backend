@@ -48,6 +48,8 @@ switch ($method) {
             $stmt5->bindParam('appointment_status', $status);
             $stmt5->bindParam('appointment_id', $patients->appointment_id);
 
+            $stmt5->execute();
+
             $response = [
                 "status" => "success",
                 "message" => "Patient created successfully"
