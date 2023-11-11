@@ -10,7 +10,16 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case "GET":
 
-        $sql = "SELECT * FROM patient ORDER BY patient_id DESC";
+        if (isset($_GET['monthly_visits'])) {
+            $sql = "SELECT DATE_FORMAT(visit_date, '%M') AS name, COUNT(*) AS total
+            FROM visits
+            GROUP BY MONTH(visit_date)";
+        }
+
+        if (!isset($_GET['monthly_visits'])) {
+            $sql = "SELECT * FROM visits ORDER BY visit_id DESC";
+        }
+
 
 
         if (isset($sql)) {
