@@ -71,4 +71,30 @@ switch ($method) {
 
         echo json_encode($response);
         break;
+
+    case "PUT":
+        $patient_medication = json_decode(file_get_contents('php://input'));
+        $sql = "UPDATE medication SET status= :status
+                    WHERE medication_id = :medication_id";
+        $stmt = $conn->prepare($sql);
+        $updated_at = date('Y-m-d');
+        $stmt->bindParam(':medication_id', $patient_medication->medication_id);
+        $stmt->bindParam(':status', $patient_medication->status);
+
+
+        if ($stmt->execute()) {
+
+            $response = [
+                "status" => "success",
+                "message" => "medication updated successfully"
+            ];
+        } else {
+            $response = [
+                "status" => "error",
+                "message" => "medication update failed"
+            ];
+        }
+
+        echo json_encode($response);
+        break;
 }
