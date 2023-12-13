@@ -40,8 +40,8 @@ switch ($method) {
 
     case "POST":
         $patients = json_decode(file_get_contents('php://input'));
-        $sql = "INSERT INTO patient (patient_id, patient_name, patient_middlename, patient_lastname, patient_birthday, patient_age, patient_gender, patient_email, patient_phone, patient_type, created_at) 
-        VALUES (null, :patient_name, :patient_middlename, :patient_lastname, :patient_birthday, :patient_age, :patient_gender, :patient_email, :patient_phone, :patient_type, :created_at)";
+        $sql = "INSERT INTO patient (patient_id, patient_name, patient_middlename, patient_lastname, patient_birthday, patient_age, patient_gender, patient_email, patient_phone, patient_type, created_at, patient_image, weight, height) 
+        VALUES (null, :patient_name, :patient_middlename, :patient_lastname, :patient_birthday, :patient_age, :patient_gender, :patient_email, :patient_phone, :patient_type, :created_at, :patient_image, :weight, :height)";
         $stmt = $conn->prepare($sql);
         $created_at = date('Y-m-d H:i:s');
         $stmt->bindParam(':patient_name', $patients->patient_name);
@@ -53,6 +53,10 @@ switch ($method) {
         $stmt->bindParam(':patient_email', $patients->patient_email);
         $stmt->bindParam(':patient_phone', $patients->patient_phone);
         $stmt->bindParam(':patient_type', $patients->patient_type);
+        $stmt->bindParam(':weight', $patients->weight);
+        $stmt->bindParam(':height', $patients->height);
+        $stmt->bindParam(':patient_image', $patients->patient_image);
+
 
         $stmt->bindParam(':created_at', $created_at);
 
